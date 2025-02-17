@@ -54,4 +54,10 @@ export class Message {
 
   @Column({ nullable: true })
   user_message_id: string;
+
+  @Column('json', { nullable: true })
+  relevantChunks: string[]; // Lưu trữ IDs của các chunks liên quan
+
+  @Column({ type: 'text', nullable: true })
+  response: string; // Câu trả lời từ LLM
 }

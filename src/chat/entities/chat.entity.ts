@@ -17,9 +17,6 @@ export class Chat {
   user: User;
 
   @Column({ nullable: true })
-  lastMessageTimeAgent: Date;
-
-  @Column({ nullable: true })
   lastMessageTimeUser: Date;
 
   @Column({ nullable: true })
@@ -31,29 +28,14 @@ export class Chat {
   @Column({ default: false })
   isFinish: boolean;
 
-  @Column({ default: false })
-  isLateCall: boolean;
-
-  @Column({ type: 'float', nullable: true })
-  totalTimeAgentResponse: number;
-
-  @Column({ type: 'float', nullable: true })
-  totalAgentResponse: number;
-
   @Column({ nullable: true })
   lastMessageTime: Date;
 
   @Column({ type: 'json', nullable: true })
   files: any;
 
-  @Column({ default: false })
-  isNeedAgent: boolean;
-
   @Column({ nullable: true })
   source: string;
-
-  @Column({ default: false })
-  waitFirstAgentResponse: boolean;
 
   @Column({ nullable: true })
   biz: string;
