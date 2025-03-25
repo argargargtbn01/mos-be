@@ -9,6 +9,8 @@ import { MessageModule } from './message/message.module';
 import { ConfigModule } from '@nestjs/config';
 import { RoleModule } from './role/role.module';
 import { PermissionModule } from './permission/permission.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -34,5 +36,7 @@ import { PermissionModule } from './permission/permission.module';
     RoleModule,
     PermissionModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
