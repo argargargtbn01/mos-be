@@ -11,10 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppController = void 0;
 const common_1 = require("@nestjs/common");
 const app_service_1 = require("./app.service");
+const axios_1 = __importDefault(require("axios"));
 let AppController = class AppController {
     constructor(appService) {
         this.appService = appService;
@@ -50,7 +54,7 @@ let AppController = class AppController {
     async handleMessage(senderId, message) {
         let responsePayload;
         if (message.text) {
-            responsePayload = { text: `Bạn vừa gửi: "${message.text}"` };
+            responsePayload = { text: `PVBANK LOONF` };
         }
         else {
             responsePayload = { text: 'Không nhận được tin nhắn text' };
@@ -60,7 +64,7 @@ let AppController = class AppController {
     async callSendAPI(senderId, responsePayload) {
         const url = `https://graph.facebook.com/v21.0/me/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`;
         try {
-            await axios.post(url, {
+            await axios_1.default.post(url, {
                 recipient: { id: senderId },
                 message: responsePayload,
             });

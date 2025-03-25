@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Response } from 'express';
+import axios from 'axios';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -50,7 +51,7 @@ export class AppController {
   async handleMessage(senderId: string, message: any): Promise<void> {
     let responsePayload;
     if (message.text) {
-      responsePayload = { text: `Bạn vừa gửi: "${message.text}"` };
+      responsePayload = { text: `PVBANK LOONF` };
     } else {
       responsePayload = { text: 'Không nhận được tin nhắn text' };
     }
