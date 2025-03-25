@@ -30,6 +30,46 @@ let AppController = class AppController {
             return res.send('Invalid request');
         }
     }
+    async handleWebhook(body) {
+        console.log('Received webhook event:', body);
+        if (body.object === 'page') {
+            for (const entry of body.entry) {
+                const messagingEvents = entry.messaging;
+                if (messagingEvents) {
+                    for (const event of messagingEvents) {
+                        const senderId = event.sender.id;
+                        if (event.message) {
+                            await this.handleMessage(senderId, event.message);
+                        }
+                    }
+                }
+            }
+        }
+        return 'EVENT_RECEIVED';
+    }
+    async handleMessage(senderId, message) {
+        let responsePayload;
+        if (message.text) {
+            responsePayload = { text: `Bạn vừa gửi: "${message.text}"` };
+        }
+        else {
+            responsePayload = { text: 'Không nhận được tin nhắn text' };
+        }
+        await this.callSendAPI(senderId, responsePayload);
+    }
+    async callSendAPI(senderId, responsePayload) {
+        const url = `https://graph.facebook.com/v21.0/me/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`;
+        try {
+            await axios.post(url, {
+                recipient: { id: senderId },
+                message: responsePayload,
+            });
+            console.log(`Message sent to ${senderId}`);
+        }
+        catch (error) {
+            console.error(`Unable to send message: ${error}`);
+        }
+    }
 };
 exports.AppController = AppController;
 __decorate([
@@ -48,6 +88,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, Object]),
     __metadata("design:returntype", void 0)
 ], AppController.prototype, "verifyWebhook", null);
+__decorate([
+    (0, common_1.Post)('/webhook'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "handleWebhook", null);
 exports.AppController = AppController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [app_service_1.AppService])

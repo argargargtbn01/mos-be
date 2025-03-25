@@ -5,4 +5,7 @@ export declare class AppController {
     constructor(appService: AppService);
     getHello(): string;
     verifyWebhook(mode: string, verifyToken: string, challenge: string, res: Response): Response<any, Record<string, any>>;
+    handleWebhook(body: any): Promise<string>;
+    handleMessage(senderId: string, message: any): Promise<void>;
+    callSendAPI(senderId: string, responsePayload: any): Promise<void>;
 }
