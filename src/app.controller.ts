@@ -108,12 +108,18 @@ export class AppController {
     } else {
       responsePayload = { text: 'Không nhận được tin nhắn' };
     }
+    console.log('response payload: ', responsePayload);
     await this.callSendAPI(userId, responsePayload);
   }
 
   // Hàm gọi API Zalo để gửi tin nhắn phản hồi
   async callSendAPI1(userId: string, responsePayload: any): Promise<void> {
     const url = 'https://openapi.zalo.me/v3.0/oa/message/cs';
+    console.log('payload: ', {
+      recipient: { user_id: userId },
+      message: responsePayload,
+    });
+
     try {
       await axios.post(
         url,
