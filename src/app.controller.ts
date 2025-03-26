@@ -74,6 +74,16 @@ export class AppController {
     }
   }
 
+  @Get('/zalo/webhook')
+  verifyWebhook1(
+    @Query('hub.mode') mode: string,
+    @Query('hub.verify_token') verifyToken: string,
+    @Query('hub.challenge') challenge: string,
+    @Res() res: Response,
+  ) {
+    return res.send('Zalo OK');
+  }
+
   // Endpoint POST để nhận sự kiện từ Zalo
   @Post('/zalo/webhook')
   async handleWebhook1(@Body() body: any, @Res() res: Response): Promise<void> {
