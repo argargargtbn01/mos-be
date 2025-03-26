@@ -113,7 +113,7 @@ export class AppController {
 
   // Hàm gọi API Zalo để gửi tin nhắn phản hồi
   async callSendAPI1(userId: string, responsePayload: any): Promise<void> {
-    const url = 'https://openapi.zalo.me/v2.0/oa/message';
+    const url = 'https://openapi.zalo.me/v3.0/oa/message/cs';
     try {
       await axios.post(
         url,
