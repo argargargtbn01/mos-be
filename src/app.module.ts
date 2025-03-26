@@ -11,7 +11,8 @@ import { RoleModule } from './role/role.module';
 import { PermissionModule } from './permission/permission.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -35,6 +36,9 @@ import { AppService } from './app.service';
     MessageModule,
     RoleModule,
     PermissionModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public')
+    })
   ],
   controllers: [AppController],
   providers: [AppService],

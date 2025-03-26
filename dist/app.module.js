@@ -20,6 +20,8 @@ const role_module_1 = require("./role/role.module");
 const permission_module_1 = require("./permission/permission.module");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
+const path_1 = require("path");
+const serve_static_1 = require("@nestjs/serve-static");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -47,6 +49,9 @@ exports.AppModule = AppModule = __decorate([
             message_module_1.MessageModule,
             role_module_1.RoleModule,
             permission_module_1.PermissionModule,
+            serve_static_1.ServeStaticModule.forRoot({
+                rootPath: (0, path_1.join)(__dirname, '..', 'public')
+            })
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
