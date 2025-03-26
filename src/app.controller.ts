@@ -51,7 +51,7 @@ export class AppController {
   async handleMessage(senderId: string, message: any): Promise<void> {
     let responsePayload;
     if (message.text) {
-      responsePayload = { text: `PVBANK LOONF` };
+      responsePayload = { text: `VPBANK GENAI TEST` };
     } else {
       responsePayload = { text: 'Không nhận được tin nhắn text' };
     }
