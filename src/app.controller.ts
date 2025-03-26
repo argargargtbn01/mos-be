@@ -106,7 +106,7 @@ export class AppController {
       responsePayload = { text: 'Không nhận được tin nhắn' };
     }
     console.log('response payload: ', responsePayload);
-    await this.callSendAPI(userId, responsePayload);
+    await this.callSendAPI1(userId, responsePayload);
   }
 
   // Hàm gọi API Zalo để gửi tin nhắn phản hồi
