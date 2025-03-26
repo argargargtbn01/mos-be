@@ -5,9 +5,6 @@ import axios from 'axios';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
-  private readonly appId = process.env.ZALO_APP_ID;
-  private readonly accessToken = process.env.ZALO_ACCESS_TOKEN;
-  private readonly secretKey = process.env.ZALO_WEBHOOK_SECRET;
   @Get()
   getHello(): string {
     return this.appService.getHello();
@@ -129,7 +126,8 @@ export class AppController {
         },
         {
           headers: {
-            access_token: this.accessToken,
+            access_token: process.env.ZALO_ACCESS_TOKEN,
+            'Content-Type': 'application/json', // Đảm bảo header này
           },
         },
       );
