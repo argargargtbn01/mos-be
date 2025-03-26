@@ -5,7 +5,9 @@ import axios from 'axios';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
-
+  private readonly appId = process.env.ZALO_APP_ID;
+  private readonly accessToken = process.env.ZALO_ACCESS_TOKEN;
+  private readonly secretKey = process.env.ZALO_WEBHOOK_SECRET;
   @Get()
   getHello(): string {
     return this.appService.getHello();
@@ -67,6 +69,55 @@ export class AppController {
         message: responsePayload,
       });
       console.log(`Message sent to ${senderId}`);
+    } catch (error) {
+      console.error(`Unable to send message: ${error}`);
+    }
+  }
+
+  // Endpoint POST để nhận sự kiện từ Zalo
+  @Post('/zalo/webhook')
+  async handleWebhook1(@Body() body: any, @Res() res: Response): Promise<void> {
+    console.log('Received webhook event from Zalo:', body);
+
+    // Xử lý sự kiện tin nhắn
+    if (body.event_name === 'user_send_text') {
+      const userId = body.sender.id; // ID người gửi
+      const message = body.message.text; // Nội dung tin nhắn
+      await this.handleMessage1(userId, message);
+    }
+
+    // Trả về 200 OK cho Zalo
+    res.status(200).send('EVENT_RECEIVED');
+  }
+
+  // Hàm xử lý tin nhắn và tạo phản hồi
+  async handleMessage1(userId: string, message: string): Promise<void> {
+    let responsePayload;
+    if (message) {
+      responsePayload = { text: `ZALO GENAI TEST: Bạn vừa gửi "${message}"` };
+    } else {
+      responsePayload = { text: 'Không nhận được tin nhắn' };
+    }
+    await this.callSendAPI(userId, responsePayload);
+  }
+
+  // Hàm gọi API Zalo để gửi tin nhắn phản hồi
+  async callSendAPI1(userId: string, responsePayload: any): Promise<void> {
+    const url = 'https://openapi.zalo.me/v2.0/oa/message';
+    try {
+      await axios.post(
+        url,
+        {
+          recipient: { user_id: userId },
+          message: responsePayload,
+        },
+        {
+          headers: {
+            access_token: this.accessToken,
+          },
+        },
+      );
+      console.log(`Message sent to ${userId}`);
     } catch (error) {
       console.error(`Unable to send message: ${error}`);
     }

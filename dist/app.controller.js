@@ -22,6 +22,9 @@ const axios_1 = __importDefault(require("axios"));
 let AppController = class AppController {
     constructor(appService) {
         this.appService = appService;
+        this.appId = process.env.ZALO_APP_ID;
+        this.accessToken = process.env.ZALO_ACCESS_TOKEN;
+        this.secretKey = process.env.ZALO_WEBHOOK_SECRET;
     }
     getHello() {
         return this.appService.getHello();
@@ -74,6 +77,42 @@ let AppController = class AppController {
             console.error(`Unable to send message: ${error}`);
         }
     }
+    async handleWebhook1(body, res) {
+        console.log('Received webhook event from Zalo:', body);
+        if (body.event_name === 'user_send_text') {
+            const userId = body.sender.id;
+            const message = body.message.text;
+            await this.handleMessage1(userId, message);
+        }
+        res.status(200).send('EVENT_RECEIVED');
+    }
+    async handleMessage1(userId, message) {
+        let responsePayload;
+        if (message) {
+            responsePayload = { text: `ZALO GENAI TEST: Bạn vừa gửi "${message}"` };
+        }
+        else {
+            responsePayload = { text: 'Không nhận được tin nhắn' };
+        }
+        await this.callSendAPI(userId, responsePayload);
+    }
+    async callSendAPI1(userId, responsePayload) {
+        const url = 'https://openapi.zalo.me/v2.0/oa/message';
+        try {
+            await axios_1.default.post(url, {
+                recipient: { user_id: userId },
+                message: responsePayload,
+            }, {
+                headers: {
+                    access_token: this.accessToken,
+                },
+            });
+            console.log(`Message sent to ${userId}`);
+        }
+        catch (error) {
+            console.error(`Unable to send message: ${error}`);
+        }
+    }
 };
 exports.AppController = AppController;
 __decorate([
@@ -99,6 +138,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "handleWebhook", null);
+__decorate([
+    (0, common_1.Post)('/zalo/webhook'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "handleWebhook1", null);
 exports.AppController = AppController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [app_service_1.AppService])
