@@ -28,7 +28,7 @@ export class AppController {
   @Post('/webhook')
   async handleWebhook(@Body() body: any): Promise<string> {
     console.log('Received webhook event:', body);
-    console.log('body.entry.messaging: ', body.entry.messaging)
+    console.log('body.entry.messaging: ', body.entry[0].messaging)
 
     if (body.object === 'page') {
       for (const entry of body.entry) {
