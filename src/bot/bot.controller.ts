@@ -1,34 +1,38 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
 import { BotService } from './bot.service';
 import { CreateBotDto } from './dto/create-bot.dto';
 import { UpdateBotDto } from './dto/update-bot.dto';
+import { Bot } from './entities/bot.entity';
 
-@Controller('bot')
+@Controller('bots')
 export class BotController {
   constructor(private readonly botService: BotService) {}
 
-  @Post()
-  create(@Body() createBotDto: CreateBotDto) {
-    return this.botService.create(createBotDto);
-  }
-
   @Get()
-  findAll() {
+  async findAll(): Promise<Bot[]> {
     return this.botService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.botService.findOne(+id);
+  async findOne(@Param('id') id: number): Promise<Bot> {
+    return this.botService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBotDto: UpdateBotDto) {
-    return this.botService.update(+id, updateBotDto);
+  @Post()
+  async create(@Body() Bot: Partial<Bot>): Promise<Bot> {
+    return this.botService.create(Bot);
+  }
+
+  @Put(':id')
+  async update(
+    @Param('id') id: number,
+    @Body() Bot: Partial<Bot>,
+  ): Promise<Bot> {
+    return this.botService.update(id, Bot);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.botService.remove(+id);
+  async delete(@Param('id') id: number): Promise<void> {
+    return this.botService.delete(id);
   }
 }

@@ -22,6 +22,7 @@ export class UserController {
 
   @Get()
   findAll() {
+    console.log('findAll called');
     return this.userService.findAll();
   }
 

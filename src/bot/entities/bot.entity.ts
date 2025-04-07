@@ -1,6 +1,7 @@
 import { BotApiKey } from 'src/bot-api-key/entities/bot-api-key.entity';
 import { Department } from 'src/department/entities/department.entity';
 import { Message } from 'src/message/entities/message.entity';
+import { Model } from 'src/model/entities/model.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()
@@ -23,8 +24,8 @@ export class Bot {
   @Column({ type: 'text', nullable: true })
   condensePrompt: string;
 
-  @Column({ nullable: true })
-  llmModelId: string;
+  @ManyToOne(() => Model)
+  llmModel: Model;
 
   @Column({ type: 'json', nullable: true })
   configurations: any;

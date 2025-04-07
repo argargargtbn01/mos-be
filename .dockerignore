@@ -7,9 +7,6 @@ dist
 # Bỏ qua các file log
 *.log
 
-# Bỏ qua các file môi trường (nếu có)
-.env
-
 # Bỏ qua các file cấu hình của Docker và Git
 Dockerfile
 docker-compose.yml
