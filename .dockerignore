@@ -1,14 +1,7 @@
-# Bỏ qua thư mục chứa các gói đã cài đặt
-node_modules
-
-# Bỏ qua thư mục build (NestJS build ra thư mục dist)
-dist
-
-# Bỏ qua các file log
-*.log
-
 # Bỏ qua các file cấu hình của Docker và Git
 Dockerfile
 docker-compose.yml
 .git
 .gitignore
+
+/node_modules

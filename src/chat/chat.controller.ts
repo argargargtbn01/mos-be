@@ -6,4 +6,9 @@ import { UpdateChatDto } from './dto/update-chat.dto';
 @Controller('chat')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
+  @Post('')
+  async chat(@Body('text') text: string): Promise<{ response: string }> {
+    const response = await this.chatService.chat(text);
+    return { response };
+  }
 }

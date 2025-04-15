@@ -67,4 +67,33 @@ export class ChatService {
 
     return response.data[0];
   }
+
+  public async chat(text: string): Promise<string> {
+    const messages = [
+      {
+        role: 'system',
+        content: 'Bạn là trợ lý AI hỗ trợ trả lời các câu hỏi từ người dùng một cách dễ hiểu, ngắn gọn.',
+      },
+      {
+        role: 'user',
+        content: text,
+      },
+    ];
+  console.log('messages', messages);
+    const response = await axios.post(
+      process.env.AI_HUB_URL,
+      {
+        model: 'gemini/gemini-2.0-pro-exp-02-05',
+        messages,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer sk-1234`,
+        },
+      },
+    );
+  
+    return response.data['choices']?.[0]?.message?.content ?? 'Không có phản hồi từ chatbot.';
+  }
 }
