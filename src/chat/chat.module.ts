@@ -1,14 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { ChatController } from './chat.controller';
-import { Chat } from './entities/chat.entity';
-import { DocumentChunk } from 'src/shared/entities/document-chunk.entity';
-import { Message } from 'src/message/entities/message.entity';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { DocumentModule } from '../document/document.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Chat, DocumentChunk, Message])],
+  imports: [DocumentModule], // Import DocumentModule để sử dụng DocumentQueryService
   controllers: [ChatController],
   providers: [ChatService],
+  exports: [ChatService],
 })
 export class ChatModule {}

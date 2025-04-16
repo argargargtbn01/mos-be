@@ -11,6 +11,7 @@ import { RoleModule } from './role/role.module';
 import { PermissionModule } from './permission/permission.module';
 import { ModelModule } from './model/model.module';
 import { AiHubModule } from './ai-hub/ai-hub.module';
+import { DocumentModule } from './document/document.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { AiHubModule } from './ai-hub/ai-hub.module';
     PermissionModule,
     ModelModule,
     AiHubModule,
+    DocumentModule,
   ],
 })
 export class AppModule {}
