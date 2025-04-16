@@ -1,26 +1,36 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Bot } from './entities/bot.entity';
 import { CreateBotDto } from './dto/create-bot.dto';
 import { UpdateBotDto } from './dto/update-bot.dto';
 
 @Injectable()
 export class BotService {
-  create(createBotDto: CreateBotDto) {
-    return 'This action adds a new bot';
+  constructor(
+    @InjectRepository(Bot)
+    private botRepository: Repository<Bot>,
+  ) {}
+
+  async findAll(): Promise<Bot[]> {
+    return this.botRepository.find();
   }
 
-  findAll() {
-    return `This action returns all bot`;
+  async findOne(id: number): Promise<Bot> {
+    return this.botRepository.findOneBy({ id });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} bot`;
+  async create(Bot: Partial<Bot>): Promise<Bot> {
+    const newDept = this.botRepository.create(Bot);
+    return this.botRepository.save(newDept);
   }
 
-  update(id: number, updateBotDto: UpdateBotDto) {
-    return `This action updates a #${id} bot`;
+  async update(id: number, Bot: Partial<Bot>): Promise<Bot> {
+    await this.botRepository.update(id, Bot);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} bot`;
+  async delete(id: number): Promise<void> {
+    await this.botRepository.delete(id);
   }
 }
