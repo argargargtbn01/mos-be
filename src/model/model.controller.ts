@@ -1,14 +1,16 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
 import { ModelService } from './model.service';
 import { Model } from './entities/model.entity';
+import { ModelInfo } from './dto/model-info.dto';
 
 @Controller('models')
 export class ModelController {
   constructor(private readonly modelService: ModelService) {}
 
   @Get()
-  async findAll(): Promise<Model[]> {
-    return this.modelService.findAll();
+  async findAll(): Promise<{ data: ModelInfo[] }> {
+    const models = await this.modelService.findAll();
+    return { data: models };
   }
 
   @Get(':id')

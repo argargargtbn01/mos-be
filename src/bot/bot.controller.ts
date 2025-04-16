@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
 import { BotService } from './bot.service';
+import { Bot } from './entities/bot.entity';
 import { CreateBotDto } from './dto/create-bot.dto';
 import { UpdateBotDto } from './dto/update-bot.dto';
-import { Bot } from './entities/bot.entity';
+import { ModelInfo } from '../model/dto/model-info.dto';
 
 @Controller('bots')
 export class BotController {
@@ -13,22 +14,29 @@ export class BotController {
     return this.botService.findAll();
   }
 
+  @Get('with-model-info')
+  async findAllWithModelInfo(): Promise<Array<{ bot: Bot, modelInfo?: ModelInfo }>> {
+    return this.botService.findAllWithModelInfo();
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<Bot> {
     return this.botService.findOne(id);
   }
 
+  @Get(':id/with-model-info')
+  async getBotWithModelInfo(@Param('id') id: number): Promise<{ bot: Bot, modelInfo?: ModelInfo }> {
+    return this.botService.getBotWithModelInfo(id);
+  }
+
   @Post()
-  async create(@Body() Bot: Partial<Bot>): Promise<Bot> {
-    return this.botService.create(Bot);
+  async create(@Body() bot: Partial<Bot>): Promise<Bot> {
+    return this.botService.create(bot);
   }
 
   @Put(':id')
-  async update(
-    @Param('id') id: number,
-    @Body() Bot: Partial<Bot>,
-  ): Promise<Bot> {
-    return this.botService.update(id, Bot);
+  async update(@Param('id') id: number, @Body() bot: Partial<Bot>): Promise<Bot> {
+    return this.botService.update(id, bot);
   }
 
   @Delete(':id')
