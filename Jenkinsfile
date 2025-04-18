@@ -7,6 +7,15 @@ pipeline {
         KUBE_CONFIG_ID = 'kubeconfig-credentials'
         DEPLOYMENT_NAME = 'mos-be-kltn-service'
         DEPLOYMENT_NAMESPACE = 'argocd'
+        // Thêm biến môi trường từ Jenkins
+        DATABASE_HOST = credentials('DATABASE_HOST')
+        DATABASE_PORT = credentials('DATABASE_PORT')
+        DATABASE_USERNAME = credentials('DATABASE_USERNAME')
+        DATABASE_PASSWORD = credentials('DATABASE_PASSWORD')
+        DATABASE_NAME = credentials('DATABASE_NAME')
+        HUGGING_FACE_TOKEN = credentials('HUGGING_FACE_TOKEN')
+        AI_HUB_BASE_URL = credentials('AI_HUB_BASE_URL')
+        AI_HUB_URL = credentials('AI_HUB_URL')
     }
 
     stages {
@@ -42,6 +51,26 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
+                // Tạo file .env từ biến môi trường Jenkins
+                sh '''
+                cat > .env << EOL
+# Database Configuration
+DATABASE_HOST=${DATABASE_HOST}
+DATABASE_PORT=${DATABASE_PORT}
+DATABASE_USERNAME=${DATABASE_USERNAME}
+DATABASE_PASSWORD=${DATABASE_PASSWORD}
+DATABASE_NAME=${DATABASE_NAME}
+
+# HuggingFace Configuration
+HUGGING_FACE_TOKEN=${HUGGING_FACE_TOKEN}
+
+# AI Hub Configuration
+AI_HUB_URL=${AI_HUB_URL}
+AI_HUB_BASE_URL=${AI_HUB_BASE_URL}
+EOL
+                '''
+                
+                // Xây dựng Docker image và copy file .env vào
                 sh "docker build -t ${DOCKER_IMAGE} ."
             }
         }
@@ -58,9 +87,28 @@ pipeline {
         // stage('Deploy to Kubernetes') {
         //     steps {
         //         withCredentials([file(credentialsId: "${KUBE_CONFIG_ID}", variable: 'KUBECONFIG')]) {
-        //             sh "kubectl --kubeconfig=$KUBECONFIG set image deployment/${DEPLOYMENT_NAME} ${DEPLOYMENT_NAME}=quang1709/mos-be:la
-        // test -n ${DEPLOYMENT_NAMESPACE}"
-        //             sh "kubectl --kubeconfig=$KUBECONFIG rollout status deployment/${DEPLOYMENT_NAME} -n ${DEPLOYMENT_NAMESPACE}"
+        //             sh '''
+        //                 # Tạo ConfigMap từ biến môi trường
+        //                 cat > mos-be-env-configmap.yaml << EOL
+        //                 apiVersion: v1
+        //                 kind: ConfigMap
+        //                 metadata:
+        //                   name: mos-be-env
+        //                   namespace: ${DEPLOYMENT_NAMESPACE}
+        //                 data:
+        //                   DATABASE_HOST: "${DATABASE_HOST}"
+        //                   DATABASE_PORT: "${DATABASE_PORT}"
+        //                   DATABASE_USERNAME: "${DATABASE_USERNAME}"
+        //                   DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
+        //                   DATABASE_NAME: "${DATABASE_NAME}"
+        //                   HUGGING_FACE_TOKEN: "${HUGGING_FACE_TOKEN}"
+        //                   AI_HUB_BASE_URL: "${AI_HUB_BASE_URL}"
+        //                 EOL
+
+        //                 kubectl --kubeconfig=$KUBECONFIG apply -f mos-be-env-configmap.yaml
+        //                 kubectl --kubeconfig=$KUBECONFIG set image deployment/${DEPLOYMENT_NAME} ${DEPLOYMENT_NAME}=quang1709/mos-be:latest -n ${DEPLOYMENT_NAMESPACE}
+        //                 kubectl --kubeconfig=$KUBECONFIG rollout status deployment/${DEPLOYMENT_NAME} -n ${DEPLOYMENT_NAMESPACE}
+        //             '''
         //         }
         //     }
         // }
@@ -76,6 +124,7 @@ pipeline {
         always {
             // Clean up to save disk space
             sh 'docker system prune -f'
+            sh 'rm -f .env' // Xóa file .env sau khi build
         }
     }
 }
