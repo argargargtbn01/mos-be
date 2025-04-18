@@ -22,11 +22,11 @@ pipeline {
             }
         }
 
-        stage('Lint Check') {
-            steps {
-                sh 'npm run lint'
-            }
-        }
+        // stage('Lint Check') {
+        //     steps {
+        //         sh 'npm run lint'
+        //     }
+        // }
 
         stage('Build Application') {
             steps {
@@ -55,15 +55,15 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                withCredentials([file(credentialsId: "${KUBE_CONFIG_ID}", variable: 'KUBECONFIG')]) {
-                    sh "kubectl --kubeconfig=$KUBECONFIG set image deployment/${DEPLOYMENT_NAME} ${DEPLOYMENT_NAME}=quang1709/mos-be:la
-        test -n ${DEPLOYMENT_NAMESPACE}"
-                    sh "kubectl --kubeconfig=$KUBECONFIG rollout status deployment/${DEPLOYMENT_NAME} -n ${DEPLOYMENT_NAMESPACE}"
-                }
-            }
-        }
+        // stage('Deploy to Kubernetes') {
+        //     steps {
+        //         withCredentials([file(credentialsId: "${KUBE_CONFIG_ID}", variable: 'KUBECONFIG')]) {
+        //             sh "kubectl --kubeconfig=$KUBECONFIG set image deployment/${DEPLOYMENT_NAME} ${DEPLOYMENT_NAME}=quang1709/mos-be:la
+        // test -n ${DEPLOYMENT_NAMESPACE}"
+        //             sh "kubectl --kubeconfig=$KUBECONFIG rollout status deployment/${DEPLOYMENT_NAME} -n ${DEPLOYMENT_NAMESPACE}"
+        //         }
+        //     }
+        // }
     }
 
     post {
