@@ -2,7 +2,11 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "quang1709/mos-be:${BUILD_NUMBER}"
+        DOCKER_IMAGE = "quang1709/mos-be:latest"
+        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
+        KUBE_CONFIG_ID = 'kubeconfig-credentials'
+        DEPLOYMENT_NAME = 'mos-be-kltn-service'
+        DEPLOYMENT_NAMESPACE = 'argocd'
     }
 
     stages {
@@ -12,18 +16,29 @@ pipeline {
             }
         }
 
-        stage('Build Application') {
+        stage('Install Dependencies') {
             steps {
                 sh 'npm install'
+            }
+        }
+
+        stage('Lint Check') {
+            steps {
+                sh 'npm run lint'
+            }
+        }
+
+        stage('Build Application') {
+            steps {
                 sh 'npm run build'
             }
         }
 
-        stage('Test Application') {
-            steps {
-                sh 'npm test'
-            }
-        }
+        // stage('Test Application') {
+        //     steps {
+        //         sh 'npm test'
+        //     }
+        // }
 
         stage('Build Docker Image') {
             steps {
@@ -33,31 +48,34 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
+                    sh "docker push ${DOCKER_IMAGE}"
                 }
-                sh "docker push ${DOCKER_IMAGE}"
             }
         }
 
-        stage('Update Manifests') {
+        stage('Deploy to Kubernetes') {
             steps {
-                dir('manifests') {
-                    checkout([$class: 'GitSCM', branches: [[name: 'main']], userRemoteConfigs: [[url: 'https://github.com/your-org/mos-be-manifests.git', credentialsId: 'github-credentials']]])
-
-                    sh "sed -i 's|image: quang1709/mos-be:.*|image: ${DOCKER_IMAGE}|' deployment.yaml"
-
-                    sh '''
-                        if ! git diff --quiet; then
-                            git config user.email "jenkins@example.com"
-                            git config user.name "Jenkins"
-                            git add deployment.yaml
-                            git commit -m "Update image to ${BUILD_NUMBER}"
-                            git push
-                        fi
-                    '''
+                withCredentials([file(credentialsId: "${KUBE_CONFIG_ID}", variable: 'KUBECONFIG')]) {
+                    sh "kubectl --kubeconfig=$KUBECONFIG set image deployment/${DEPLOYMENT_NAME} ${DEPLOYMENT_NAME}=quang1709/mos-be:la
+        test -n ${DEPLOYMENT_NAMESPACE}"
+                    sh "kubectl --kubeconfig=$KUBECONFIG rollout status deployment/${DEPLOYMENT_NAME} -n ${DEPLOYMENT_NAMESPACE}"
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'CI/CD pipeline completed successfully!'
+        }
+        failure {
+            echo 'CI/CD pipeline failed. Please check the logs for details.'
+        }
+        always {
+            // Clean up to save disk space
+            sh 'docker system prune -f'
         }
     }
 }

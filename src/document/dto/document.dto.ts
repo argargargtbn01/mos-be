@@ -46,7 +46,7 @@ export class UpdateDocumentDto {
   @IsOptional()
   @IsString()
   status?: string;
-  
+
   @IsOptional()
   @IsString()
   mimeType?: string;

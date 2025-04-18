@@ -9,17 +9,17 @@ export class DocumentService {
   private readonly logger = new Logger(DocumentService.name);
   private readonly dataProcessingJobBaseUrl: string;
 
-  constructor(
-    private readonly configService: ConfigService,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     this.dataProcessingJobBaseUrl =
-      this.configService.get<string>('DATA_PROCESSING_URL') ||
-      'http://localhost:3001'; // Sử dụng port 3001 cho data-processing-job
+      this.configService.get<string>('DATA_PROCESSING_URL') || 'http://localhost:3001'; // Sử dụng port 3001 cho data-processing-job
   }
 
   async create(createDocumentDto: CreateDocumentDto) {
     try {
-      const response = await axios.post(`${this.dataProcessingJobBaseUrl}/documents`, createDocumentDto);
+      const response = await axios.post(
+        `${this.dataProcessingJobBaseUrl}/documents`,
+        createDocumentDto,
+      );
       return response.data;
     } catch (error) {
       this.logger.error(error.response?.data);
@@ -52,11 +52,15 @@ export class DocumentService {
       this.logger.log(`Uploading file ${file.originalname} for bot ${botId}`);
 
       // Gọi API upload của data-processing-job
-      const response = await axios.post(`${this.dataProcessingJobBaseUrl}/documents/upload`, formData, {
-        headers: {
-          ...formData.getHeaders(),
+      const response = await axios.post(
+        `${this.dataProcessingJobBaseUrl}/documents/upload`,
+        formData,
+        {
+          headers: {
+            ...formData.getHeaders(),
+          },
         },
-      });
+      );
       return response.data;
     } catch (error) {
       this.logger.error(`Upload error: ${error.message || error}`);
@@ -65,7 +69,9 @@ export class DocumentService {
   }
 
   async findAll(botId?: number) {
-    const url = botId ? `${this.dataProcessingJobBaseUrl}/documents?botId=${botId}` : `${this.dataProcessingJobBaseUrl}/documents`;
+    const url = botId
+      ? `${this.dataProcessingJobBaseUrl}/documents?botId=${botId}`
+      : `${this.dataProcessingJobBaseUrl}/documents`;
 
     try {
       const response = await axios.get(url);
@@ -91,7 +97,10 @@ export class DocumentService {
 
   async update(id: string, updateDocumentDto: UpdateDocumentDto) {
     try {
-      const response = await axios.patch(`${this.dataProcessingJobBaseUrl}/documents/${id}`, updateDocumentDto);
+      const response = await axios.patch(
+        `${this.dataProcessingJobBaseUrl}/documents/${id}`,
+        updateDocumentDto,
+      );
       return response.data;
     } catch (error) {
       if (error.response?.status === 404) {

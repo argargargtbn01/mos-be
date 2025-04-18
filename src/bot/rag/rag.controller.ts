@@ -15,11 +15,7 @@ export class RagController {
     @Param('botId') botId: number,
     @Body() dto: RagQueryDto,
   ): Promise<{ answer: string }> {
-    const answer = await this.ragService.generateRagResponse(
-      botId,
-      dto.query,
-      dto.history || [],
-    );
+    const answer = await this.ragService.generateRagResponse(botId, dto.query, dto.history || []);
     return { answer };
   }
 }

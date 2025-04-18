@@ -14,14 +14,14 @@ export class DocumentQueryService {
   /**
    * Xử lý câu hỏi liên quan đến documents và lấy câu trả lời từ RAG
    */
-  async queryDocuments(query: string, botId: number, maxResults: number = 5): Promise<any> {
+  async queryDocuments(query: string, botId: number, maxResults = 5): Promise<any> {
     try {
       this.logger.log(`Gửi câu hỏi "${query}" đến data-hub cho botId: ${botId}`);
 
       const response = await axios.post(`${this.dataHubUrl}/rag/query`, {
         query,
         botId,
-        maxResults
+        maxResults,
       });
 
       return {
@@ -32,7 +32,7 @@ export class DocumentQueryService {
       };
     } catch (error) {
       this.logger.error(`Lỗi khi gọi API RAG của data-hub: ${error.message}`);
-      
+
       if (error.response?.status === 404) {
         this.logger.warn(
           `Endpoint RAG không tìm thấy ở ${this.dataHubUrl}/rag/query. Kiểm tra xem data-hub có đang chạy và đã đăng ký RAG module chưa.`,

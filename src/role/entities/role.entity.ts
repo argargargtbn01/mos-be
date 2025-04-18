@@ -14,11 +14,11 @@ export class Role {
   description: string; // Mô tả vai trò (tuỳ chọn)
 
   // Một Role có thể có nhiều User
-  @OneToMany(() => User, user => user.role)
+  @OneToMany(() => User, (user) => user.role)
   users: User[];
 
   // Một Role có thể có nhiều Permission (và ngược lại)
-  @ManyToMany(() => Permission, permission => permission.roles, { cascade: true })
+  @ManyToMany(() => Permission, (permission) => permission.roles, { cascade: true })
   @JoinTable() // Tạo bảng trung gian để liên kết Role - Permission
   permissions: Permission[];
 }

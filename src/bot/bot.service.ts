@@ -38,9 +38,9 @@ export class BotService {
   }
 
   // Method to get bot details with model information from API
-  async getBotWithModelInfo(id: number): Promise<{ bot: Bot, modelInfo?: ModelInfo }> {
+  async getBotWithModelInfo(id: number): Promise<{ bot: Bot; modelInfo?: ModelInfo }> {
     const bot = await this.findOne(id);
-    
+
     if (!bot) {
       throw new NotFoundException(`Bot with ID ${id} not found`);
     }
@@ -56,26 +56,26 @@ export class BotService {
 
     return {
       bot,
-      modelInfo: modelInfo || undefined
+      modelInfo: modelInfo || undefined,
     };
   }
 
   // Method to get all bots with their model information
-  async findAllWithModelInfo(): Promise<Array<{ bot: Bot, modelInfo?: ModelInfo }>> {
+  async findAllWithModelInfo(): Promise<Array<{ bot: Bot; modelInfo?: ModelInfo }>> {
     const bots = await this.findAll();
     let models: ModelInfo[] = [];
-    
+
     try {
       models = await this.modelService.findAll();
     } catch (error) {
       console.error('Error fetching models:', error);
     }
 
-    return bots.map(bot => {
-      const modelInfo = models.find(model => model.model_name === bot.modelName);
+    return bots.map((bot) => {
+      const modelInfo = models.find((model) => model.model_name === bot.modelName);
       return {
         bot,
-        modelInfo
+        modelInfo,
       };
     });
   }

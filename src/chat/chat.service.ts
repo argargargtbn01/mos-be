@@ -14,8 +14,7 @@ export class ChatService {
     private documentQueryService: DocumentQueryService,
   ) {
     this.llmApiEndpoint =
-      this.configService.get<string>('AI_HUB_URL') ||
-      'https://api.openai.com/v1/chat/completions';
+      this.configService.get<string>('AI_HUB_URL') || 'https://api.openai.com/v1/chat/completions';
     this.llmApiKey = 'sk-1234';
   }
 
@@ -25,7 +24,7 @@ export class ChatService {
   async generateChatResponse(
     botId: number,
     query: string,
-    useRAG: boolean = true,
+    useRAG = true,
     temperature?: number,
     maxTokens?: number,
   ): Promise<any> {
@@ -106,11 +105,7 @@ Trả lời:
   /**
    * Gửi prompt đến LLM API và nhận về câu trả lời
    */
-  private async queryLLM(
-    prompt: string,
-    temperature: number = 0.7,
-    maxTokens: number = 2000,
-  ): Promise<string> {
+  private async queryLLM(prompt: string, temperature = 0.7, maxTokens = 2000): Promise<string> {
     try {
       // Kiểm tra API key
       if (!this.llmApiKey) {

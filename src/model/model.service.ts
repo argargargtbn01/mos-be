@@ -21,7 +21,7 @@ export class ModelService {
           Authorization: 'Bearer sk-1234',
         },
       });
-  
+
       return response.data['data'];
     } catch (error) {
       throw new Error(`Failed to fetch models: ${error.message}`);
@@ -35,7 +35,7 @@ export class ModelService {
   async findByName(name: string): Promise<ModelInfo | undefined> {
     try {
       const models = await this.findAll();
-      return models.find(model => model.model_name === name);
+      return models.find((model) => model.model_name === name);
     } catch (error) {
       throw new HttpException(
         `Error finding model by name: ${error.message}`,

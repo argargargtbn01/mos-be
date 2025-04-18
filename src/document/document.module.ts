@@ -6,9 +6,7 @@ import { DocumentQueryController } from './document-query.controller';
 import { DocumentQueryService } from './document-query.service';
 
 @Module({
-  imports: [
-    ConfigModule,
-  ],
+  imports: [ConfigModule],
   controllers: [DocumentController, DocumentQueryController],
   providers: [DocumentService, DocumentQueryService],
   exports: [DocumentService, DocumentQueryService],

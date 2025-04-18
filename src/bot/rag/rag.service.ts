@@ -28,10 +28,10 @@ export class RagService {
   async generateRagResponse(botId: number, query: string, history: any[] = []): Promise<string> {
     try {
       this.logger.log(`Generating RAG response for botId: ${botId}, query: ${query}`);
-      
+
       // 1. Gọi data-hub để lấy ngữ cảnh đã chuẩn bị từ các tài liệu liên quan
       const context = await this.getContextFromDataHub(botId, query);
-      
+
       // 2. Gửi câu hỏi và ngữ cảnh tới LLM để sinh câu trả lời
       return this.generateLlmResponse(query, context, history);
     } catch (error) {
@@ -42,18 +42,20 @@ export class RagService {
 
   private async getContextFromDataHub(botId: number, query: string): Promise<string> {
     try {
-      this.logger.log(`Getting prepared context from data-hub for botId: ${botId}, query: ${query}`);
-      
+      this.logger.log(
+        `Getting prepared context from data-hub for botId: ${botId}, query: ${query}`,
+      );
+
       const response = await axios.post(`${this.dataHubUrl}/retrieval/prepare-context`, {
         botId,
         query,
         k: 5, // Số lượng tài liệu tối đa
       });
-      
+
       if (response.data && response.data['context']) {
         return response.data['context'];
       }
-      
+
       this.logger.warn(`No context received from data-hub for query: ${query}`);
       return '';
     } catch (error) {
@@ -62,11 +64,15 @@ export class RagService {
     }
   }
 
-  private async generateLlmResponse(query: string, context: string, history: any[]): Promise<string> {
+  private async generateLlmResponse(
+    query: string,
+    context: string,
+    history: any[],
+  ): Promise<string> {
     try {
       // Tạo prompt cho LLM, kết hợp context với query
       let prompt = '';
-      
+
       if (context) {
         prompt = `Sử dụng thông tin sau đây để trả lời câu hỏi:
         
@@ -78,27 +84,24 @@ Trả lời dựa trên thông tin được cung cấp. Nếu không tìm thấy
       } else {
         prompt = `Câu hỏi: ${query}\n\nHãy trả lời dựa trên kiến thức của bạn.`;
       }
-      
+
       // Gửi yêu cầu đến LLM API
       const response = await axios.post(
         this.llmApiUrl,
         {
           model: 'gpt-4', // hoặc model khác tùy cấu hình
-          messages: [
-            ...history,
-            { role: 'user', content: prompt }
-          ],
+          messages: [...history, { role: 'user', content: prompt }],
           temperature: 0.7,
           max_tokens: 500,
         },
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.llmApiKey}`,
+            Authorization: `Bearer ${this.llmApiKey}`,
           },
         },
       );
-      
+
       return response.data['choices'][0].message.content;
     } catch (error) {
       this.logger.error(`Error generating LLM response: ${error.message}`);

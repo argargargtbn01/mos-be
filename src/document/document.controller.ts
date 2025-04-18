@@ -30,10 +30,7 @@ export class DocumentController {
       limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
     }),
   )
-  async uploadFile(
-    @UploadedFile() file: Express.Multer.File,
-    @Body('botId') botId: string,
-  ) {
+  async uploadFile(@UploadedFile() file: Express.Multer.File, @Body('botId') botId: string) {
     console.log('Received file:', file ? file.originalname : 'No file received');
     console.log('Received botId:', botId);
     const botIdNum = parseInt(botId) || 1;
