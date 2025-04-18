@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "quang1709/mos-be:latest"
-        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
+        DOCKER_CREDENTIALS_ID = 'quang1709-dockerhub'
         KUBE_CONFIG_ID = 'kubeconfig-credentials'
         DEPLOYMENT_NAME = 'mos-be-kltn-service'
         DEPLOYMENT_NAMESPACE = 'argocd'
