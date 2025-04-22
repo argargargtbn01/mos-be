@@ -4,7 +4,7 @@ import { Role } from 'src/role/entities/role.entity';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('increment')
   id: number;
 
   @Column()
@@ -18,10 +18,10 @@ export class User {
   status: string;
 
   // Liên kết đến phòng ban mà user thuộc về
-  @ManyToOne(() => Department, (department) => department.users, { eager: true })
+  @ManyToOne(() => Department, (department) => department.users, { eager: true, nullable:true })
   department: Department;
 
   // Liên kết đến vai trò của user (Role)
-  @ManyToOne(() => Role, (role) => role.users, { eager: true })
+  @ManyToOne(() => Role, (role) => role.users, { eager: true, nullable:true })
   role: Role;
 }

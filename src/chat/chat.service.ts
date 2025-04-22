@@ -37,10 +37,31 @@ export class ChatService {
 
       if (useRAG) {
         try {
+          this.logger.log(
+            `Gọi DocumentQueryService.queryDocuments() cho query: "${query}", botId: ${botId}`,
+          );
           const ragResponse = await this.documentQueryService.queryDocuments(query, botId);
+
+          this.logger.log(
+            `Nhận được phản hồi từ DocumentQueryService: ${JSON.stringify({
+              answer: ragResponse.answer ? ragResponse.answer.substring(0, 50) + '...' : 'N/A',
+              hasError: !!ragResponse.error,
+              hasSources: !!(ragResponse.sources && ragResponse.sources.length > 0),
+              sourceCount: ragResponse.sources?.length || 0,
+            })}`,
+          );
+
           if (ragResponse.sources && ragResponse.sources.length > 0) {
             context = ragResponse.sources.map((source) => source.textPreview || '').join('\n\n');
+            this.logger.log(
+              `Đã tạo context từ ${ragResponse.sources.length} sources, độ dài: ${context.length} ký tự`,
+            );
+            this.logger.log(
+              `Context preview: ${context.substring(0, 200)}${context.length > 200 ? '...' : ''}`,
+            );
             sources = ragResponse.sources;
+          } else {
+            this.logger.warn(`Không có sources nhận được từ DocumentQueryService`);
           }
         } catch (error) {
           this.logger.warn(
@@ -107,12 +128,6 @@ Trả lời:
    */
   private async queryLLM(prompt: string, temperature = 0.7, maxTokens = 2000): Promise<string> {
     try {
-      // Kiểm tra API key
-      if (!this.llmApiKey) {
-        this.logger.warn('Chưa cấu hình API key cho LLM');
-        return 'Không thể kết nối với language model vì thiếu API key.';
-      }
-
       // Gọi API dựa vào endpoint được cấu hình
       if (this.llmApiEndpoint.includes('openai.com')) {
         // OpenAI API

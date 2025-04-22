@@ -50,6 +50,7 @@ export class DocumentService {
       formData.append('botId', botId.toString());
 
       this.logger.log(`Uploading file ${file.originalname} for bot ${botId}`);
+      this.logger.log(`Sending request to: ${this.dataProcessingJobBaseUrl}/documents/upload`);
 
       // Gọi API upload của data-processing-job
       const response = await axios.post(
@@ -63,8 +64,21 @@ export class DocumentService {
       );
       return response.data;
     } catch (error) {
+      if (error.code === 'ECONNREFUSED') {
+        this.logger.error(`Connection refused to data-processing-job at ${this.dataProcessingJobBaseUrl}`);
+        throw new BadRequestException('Cannot connect to data processing service. Please try again later.');
+      }
+      
+      if (error.code === 'ETIMEDOUT' || error.code === 'ESOCKETTIMEDOUT') {
+        this.logger.error(`Connection timeout to data-processing-job at ${this.dataProcessingJobBaseUrl}`);
+        throw new BadRequestException('Connection timeout to data processing service. Please try again later.');
+      }
+
       this.logger.error(`Upload error: ${error.message || error}`);
-      throw error;
+      this.logger.error(`Error details: ${JSON.stringify(error.response?.data || {})}`);
+      this.logger.error(`Error stack: ${error.stack}`);
+      
+      throw new BadRequestException('Failed to upload file. Please try again later.');
     }
   }
 
