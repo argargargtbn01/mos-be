@@ -8,7 +8,7 @@ export class DocumentQueryService {
   private readonly dataHubUrl: string;
 
   constructor(private configService: ConfigService) {
-    this.dataHubUrl = this.configService.get<string>('DATA_HUB_URL') || 'http://localhost:3002';
+    this.dataHubUrl = this.configService.get<string>('DATA_HUB_URL') || 'http://quang1709.ddns.net:3002';
   }
 
   /**

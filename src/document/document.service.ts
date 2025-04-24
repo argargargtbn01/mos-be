@@ -11,7 +11,7 @@ export class DocumentService {
 
   constructor(private readonly configService: ConfigService) {
     this.dataProcessingJobBaseUrl =
-      this.configService.get<string>('DATA_PROCESSING_URL') || 'http://localhost:3001'; // Sử dụng port 3001 cho data-processing-job
+      this.configService.get<string>('DATA_PROCESSING_URL') || 'http://quang1709.ddns.net:3001'; // Sử dụng port 3001 cho data-processing-job
   }
 
   async create(createDocumentDto: CreateDocumentDto) {
