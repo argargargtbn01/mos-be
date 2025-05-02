@@ -1,7 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { DocumentQueryService } from '../document/document-query.service';
+import { BotService } from '../bot/bot.service';
+import { ModelService } from '../model/model.service';
 
 @Injectable()
 export class ChatService {
@@ -12,6 +14,8 @@ export class ChatService {
   constructor(
     private configService: ConfigService,
     private documentQueryService: DocumentQueryService,
+    private botService: BotService,
+    private modelService: ModelService,
   ) {
     this.llmApiEndpoint =
       this.configService.get<string>('AI_HUB_URL') || 'https://api.openai.com/v1/chat/completions';
@@ -30,6 +34,15 @@ export class ChatService {
   ): Promise<any> {
     try {
       this.logger.log(`Tạo phản hồi chat cho query: "${query}", useRAG: ${useRAG}`);
+
+      // Lấy thông tin về bot và model của bot
+      const { bot, modelInfo } = await this.botService.getBotWithModelInfo(botId);
+
+      if (!bot) {
+        throw new NotFoundException(`Bot với ID ${botId} không tồn tại`);
+      }
+
+      this.logger.log(`Sử dụng bot: ${bot.name}, model: ${bot.modelName || 'không có'}`);
 
       // Nếu sử dụng RAG, lấy ngữ cảnh từ tài liệu
       let context = '';
@@ -70,11 +83,11 @@ export class ChatService {
         }
       }
 
-      // Tạo prompt phù hợp dựa vào việc có context từ RAG hay không
-      const prompt = this.createPrompt(query, context);
+      // Tạo prompt dựa trên bot.prompt hoặc mặc định
+      const prompt = this.createPrompt(query, context, bot);
 
-      // Gọi LLM API để lấy phản hồi
-      const answer = await this.queryLLM(prompt, temperature, maxTokens);
+      // Gọi LLM API để lấy phản hồi, sử dụng thông tin model từ bot
+      const answer = await this.queryLLM(prompt, bot, modelInfo, temperature, maxTokens);
 
       return {
         answer,
@@ -90,9 +103,24 @@ export class ChatService {
   }
 
   /**
-   * Tạo prompt dựa trên có hay không có context
+   * Tạo prompt dựa trên có hay không có context và cấu hình bot
    */
-  private createPrompt(query: string, context?: string): string {
+  private createPrompt(query: string, context?: string, bot?: any): string {
+    // Nếu bot có prompt tùy chỉnh và không rỗng, sử dụng nó
+    if (bot && bot.prompt && bot.prompt.trim()) {
+      let customPrompt = bot.prompt;
+
+      // Thay thế placeholders nếu có
+      if (context && context.trim()) {
+        customPrompt = customPrompt.replace('{context}', context);
+      }
+
+      customPrompt = customPrompt.replace('{query}', query);
+
+      return customPrompt;
+    }
+
+    // Nếu không có prompt tùy chỉnh, sử dụng mẫu mặc định
     if (context && context.trim()) {
       // Prompt với RAG
       return `
@@ -125,19 +153,40 @@ Trả lời:
 
   /**
    * Gửi prompt đến LLM API và nhận về câu trả lời
+   * Sử dụng thông tin model từ bot và modelInfo để định cấu hình yêu cầu API
    */
-  private async queryLLM(prompt: string, temperature = 0.7, maxTokens = 2000): Promise<string> {
+  private async queryLLM(
+    prompt: string,
+    bot?: any,
+    modelInfo?: any,
+    temperature = 0.7,
+    maxTokens = 2000,
+  ): Promise<string> {
     try {
+      // Sử dụng cài đặt từ bot nếu có
+      const modelTemp = bot?.configurations?.temperature || temperature;
+      const modelMaxTokens = bot?.configurations?.maxTokens || maxTokens;
+
+      // Lấy model name từ bot hoặc fallback vào default
+      const modelName = bot?.modelName || 'gemini/gemini-2.0-pro-exp-02-05';
+
+      this.logger.log(
+        `Gọi API với model: ${modelName}, temperature: ${modelTemp}, maxTokens: ${modelMaxTokens}`,
+      );
+
       // Gọi API dựa vào endpoint được cấu hình
-      if (this.llmApiEndpoint.includes('openai.com')) {
+      if (
+        this.llmApiEndpoint.includes('openai.com') ||
+        (modelInfo && modelInfo.litellm_params?.custom_llm_provider === 'openai')
+      ) {
         // OpenAI API
         const response = await axios.post(
           this.llmApiEndpoint,
           {
-            model: 'gpt-3.5-turbo',
+            model: modelName.includes('gpt') ? modelName : 'gpt-3.5-turbo',
             messages: [{ role: 'user', content: prompt }],
-            temperature: temperature || 0.7,
-            max_tokens: maxTokens || 2000,
+            temperature: modelTemp || 0.7,
+            max_tokens: modelMaxTokens || 2000,
           },
           {
             headers: {
@@ -149,13 +198,21 @@ Trả lời:
 
         return response.data['choices'][0].message.content;
       }
-      // Hỗ trợ Gemini API
-      else if (this.llmApiEndpoint.includes('chat/completions')) {
-        // Gemini API
+      // Hỗ trợ Gemini API và các API khác từ ModelInfo
+      else {
+        const useGemini =
+          modelName.includes('gemini') ||
+          (modelInfo && modelInfo.litellm_params?.custom_llm_provider === 'google');
+
+        const apiModel =
+          modelName || (useGemini ? 'gemini/gemini-2.0-pro-exp-02-05' : modelInfo?.model_name);
+
+        this.logger.log(`Sử dụng model API: ${apiModel}`);
+
         const response = await axios.post(
           this.llmApiEndpoint,
           {
-            model: 'gemini/gemini-2.0-pro-exp-02-05', // Có thể cấu hình trong env
+            model: apiModel,
             messages: [
               {
                 role: 'system',
@@ -166,8 +223,8 @@ Trả lời:
                 content: prompt,
               },
             ],
-            temperature: temperature || 0.7,
-            max_tokens: maxTokens || 2000,
+            temperature: modelTemp || 0.7,
+            max_tokens: modelMaxTokens || 2000,
           },
           {
             headers: {
@@ -178,11 +235,6 @@ Trả lời:
         );
 
         return response.data['choices'][0].message.content;
-      }
-      // Có thể mở rộng để hỗ trợ các API khác ở đây
-      else {
-        this.logger.warn(`API endpoint không được hỗ trợ: ${this.llmApiEndpoint}`);
-        return 'API language model chưa được hỗ trợ. Vui lòng cấu hình LLM_API_ENDPOINT phù hợp.';
       }
     } catch (error) {
       this.logger.error(`Lỗi khi gọi LLM API: ${error.message}`);
