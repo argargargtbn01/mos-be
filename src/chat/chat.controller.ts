@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Logger } from '@nestjs/common';
+import { Body, Controller, Logger, Post } from '@nestjs/common';
 import { ChatService } from './chat.service';
 
 @Controller('chat')
@@ -16,12 +16,13 @@ export class ChatController {
       useRAG?: boolean;
       temperature?: number;
       maxTokens?: number;
+      chatId?: string; // Hỗ trợ chatId để theo dõi cuộc trò chuyện
     },
   ) {
     this.logger.log(
       `Nhận yêu cầu chat cho botId: ${chatRequest.botId}, query: "${chatRequest.query}", useRAG: ${
         chatRequest.useRAG ? 'true' : 'false'
-      }`,
+      }, chatId: ${chatRequest.chatId || 'new'}`,
     );
 
     return this.chatService.generateChatResponse(
@@ -30,6 +31,7 @@ export class ChatController {
       chatRequest.useRAG ?? true,
       chatRequest.temperature,
       chatRequest.maxTokens,
+      chatRequest.chatId,
     );
   }
 }
