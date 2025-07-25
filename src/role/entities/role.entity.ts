@@ -7,7 +7,7 @@ export class Role {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column()
   name: string; // Ví dụ: "Admin", "User", "Manager"
 
   @Column({ nullable: true })
