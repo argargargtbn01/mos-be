@@ -17,7 +17,7 @@ pipeline {
         AI_HUB_BASE_URL = credentials('AI_HUB_BASE_URL')
         AI_HUB_URL = credentials('AI_HUB_URL')
         // Thêm biến môi trường từ Sonarqube
-        SONARQUBE_HOST_URL = "http://quang1709.ddns.net:9000"		
+        SONAR_HOST_URL = "http://quang1709.ddns.net:9000"		
 		projectKey = "mos-be"
 
     }
