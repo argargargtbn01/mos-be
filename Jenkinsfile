@@ -16,6 +16,10 @@ pipeline {
         HUGGING_FACE_TOKEN = credentials('HUGGING_FACE_TOKEN')
         AI_HUB_BASE_URL = credentials('AI_HUB_BASE_URL')
         AI_HUB_URL = credentials('AI_HUB_URL')
+        // Thêm biến môi trường từ Sonarqube
+        SONARQUBE_HOST_URL = "http://quang1709.ddns.net:9000"		
+		projectKey = "mos-be"
+
     }
 
     stages {
@@ -24,6 +28,33 @@ pipeline {
                 checkout scm
             }
         }
+
+        stage('SonarQube Scan') {
+            when { anyOf { branch 'dev'; branch 'master' } }
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                script {
+                    def scanner = tool 'SonarScanner'
+                    def branch  = (env.GIT_BRANCH ?: 'master').replace('origin/','')
+                    def version = "${branch}-${env.BUILD_NUMBER}"
+
+                    sh """
+                    ${scanner}/bin/sonar-scanner \
+                        -Dsonar.projectKey=${env.projectKey} \
+                        -Dsonar.projectVersion=${version} \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=$SONAR_HOST_URL \
+                        -Dsonar.login=$SONAR_AUTH_TOKEN
+                    """
+
+                    echo "Dashboard: ${env.SONAR_HOST_URL}/dashboard?id=${env.projectKey}"
+                    echo "Version (Activity filter): ${version}"
+                }
+                }
+            }
+        }
+
+
 
         stage('Install Dependencies') {
             steps {
