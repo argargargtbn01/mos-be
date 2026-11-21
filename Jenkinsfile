@@ -14,8 +14,10 @@ pipeline {
         DATABASE_PASSWORD = credentials('DATABASE_PASSWORD')
         DATABASE_NAME = credentials('DATABASE_NAME')
         HUGGING_FACE_TOKEN = credentials('HUGGING_FACE_TOKEN')
-        AI_HUB_BASE_URL = credentials('AI_HUB_BASE_URL')
-        AI_HUB_URL = credentials('AI_HUB_URL')
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        AWS_REGION = credentials('AWS_REGION')
+        BEDROCK_MODEL_ID = credentials('BEDROCK_MODEL_ID')
     }
 
     stages {
@@ -64,9 +66,11 @@ DATABASE_NAME=${DATABASE_NAME}
 # HuggingFace Configuration
 HUGGING_FACE_TOKEN=${HUGGING_FACE_TOKEN}
 
-# AI Hub Configuration
-AI_HUB_URL=${AI_HUB_URL}
-AI_HUB_BASE_URL=${AI_HUB_BASE_URL}
+# AWS Bedrock Configuration
+AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+AWS_REGION=${AWS_REGION}
+BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID}
 EOL
                 '''
                 

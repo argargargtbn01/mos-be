@@ -9,7 +9,7 @@ COPY package*.json ./
 
 RUN npm config set registry https://registry.npmjs.org/
 
-RUN npm install -g npm@latest
+RUN npm install -g npm@10
 
 RUN npm cache clean --force
 
