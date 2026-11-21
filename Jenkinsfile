@@ -27,6 +27,33 @@ pipeline {
             }
         }
 
+        stage('SonarQube Scan') {
+            when { anyOf { branch 'dev'; branch 'master' } }
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                script {
+                    def scanner = tool 'SonarScanner'
+                    def branch  = (env.GIT_BRANCH ?: 'master').replace('origin/','')
+                    def version = "${branch}-${env.BUILD_NUMBER}"
+
+                    sh """
+                    ${scanner}/bin/sonar-scanner \
+                        -Dsonar.projectKey=${env.projectKey} \
+                        -Dsonar.projectVersion=${version} \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=$SONAR_HOST_URL \
+                        -Dsonar.login=$SONAR_AUTH_TOKEN
+                    """
+
+                    echo "Dashboard: ${env.SONAR_HOST_URL}/dashboard?id=${env.projectKey}"
+                    echo "Version (Activity filter): ${version}"
+                }
+                }
+            }
+        }
+
+
+
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'

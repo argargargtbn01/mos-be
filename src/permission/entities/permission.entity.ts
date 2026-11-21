@@ -6,7 +6,7 @@ export class Permission {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column()
   name: string; // Ví dụ: "CREATE_USER", "UPDATE_CHAT", etc.
 
   @Column({ nullable: true })
